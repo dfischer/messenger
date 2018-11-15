@@ -314,7 +314,7 @@ func (r *Response) PassThreadToInbox() error {
 		Metadata:    "Passing to inbox secondary app",
 	}
 
-	data, err := json.Marshal(p)
+	data, err := p.marshal()
 	if err != nil {
 		return err
 	}
