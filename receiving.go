@@ -4,7 +4,7 @@ import "time"
 
 // Receive is the format in which webhook events are sent.
 type Receive struct {
-	// Object should always be `page`. (I don't quite understand why)
+	// Object should always be `page`. This is because it comes from a page subscription.
 	Object string `json:"object"`
 	// Entry is all of the different messenger types which were
 	// sent in this event.

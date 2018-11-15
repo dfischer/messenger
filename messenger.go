@@ -31,7 +31,7 @@ type Options struct {
 	// AppSecret is the app secret from the Facebook Developer Portal. Used when
 	// in the "verify" mode.
 	AppSecret string
-	// VerifyToken is the token to be used when verifying the webhook. Is set
+	// VerifyToken is the token to be used when verifying the Webhook. Is set
 	// when the webhook is created.
 	VerifyToken string
 	// Token is the access token of the Facebook page to send messages from.
@@ -217,18 +217,20 @@ func (m *Messenger) Handle(w http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal(body, &rec)
 	if err != nil {
 		fmt.Println("could not decode response:", err)
-		fmt.Fprintln(w, `{status: 'not ok'}`)
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
+	// Checks this is an event from a page subscription
 	if rec.Object != "page" {
-		fmt.Println("Object is not page, undefined behaviour. Got", rec.Object)
+		http.Error(w, "Object is not page, undefined behaviour. Got: "+rec.Object, http.StatusUnprocessableEntity)
+		return
 	}
 
 	if m.verify {
 		if err := m.checkIntegrity(r); err != nil {
 			fmt.Println("could not verify request:", err)
-			fmt.Fprintln(w, `{status: 'not ok'}`)
+			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
 	}
@@ -412,5 +414,5 @@ func (m *Messenger) verifyHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, r.FormValue("hub.challenge"))
 		return
 	}
-	fmt.Fprintln(w, "Incorrect verify token.")
+	http.Error(w, "Incorrect verify token", http.StatusForbidden)
 }
