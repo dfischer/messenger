@@ -56,6 +56,9 @@ type ReadHandler func(Read, *Response)
 // PostBackHandler is a handler used postback callbacks.
 type PostBackHandler func(PostBack, *Response)
 
+// ThreadControlHandler is used for passThreadControl callbacks.
+type ThreadControlHandler func(ThreadControlMessage, *Response)
+
 // OptInHandler is a handler used to handle opt-ins.
 type OptInHandler func(OptIn, *Response)
 
@@ -72,6 +75,7 @@ type Messenger struct {
 	messageHandlers        []MessageHandler
 	deliveryHandlers       []DeliveryHandler
 	readHandlers           []ReadHandler
+	threadControlHandlers  []ThreadControlHandler
 	postBackHandlers       []PostBackHandler
 	optInHandlers          []OptInHandler
 	referralHandlers       []ReferralHandler
@@ -137,6 +141,11 @@ func (m *Messenger) HandlePostBack(f PostBackHandler) {
 // HandleReferral adds a new ReferralHandler to the Messenger
 func (m *Messenger) HandleReferral(f ReferralHandler) {
 	m.referralHandlers = append(m.referralHandlers, f)
+}
+
+// HandleThreadControl adds a threadControl handler to the client
+func (m *Messenger) HandleThreadControl(f ThreadControlHandler) {
+	m.threadControlHandlers = append(m.threadControlHandlers, f)
 }
 
 // HandleAccountLinking adds a new AccountLinkingHandler to the Messenger
@@ -401,6 +410,14 @@ func (m *Messenger) dispatch(r Receive) {
 					message.Time = time.Unix(info.Timestamp/int64(time.Microsecond), 0)
 					f(message, resp)
 				}
+			case PassThreadControlAction:
+				for _, f := range m.threadControlHandlers {
+					message := *info.PassThreadControl
+					message.Sender = info.Sender
+					message.Recipient = info.Recipient
+					message.Time = time.Unix(info.Timestamp/int64(time.Microsecond), 0)
+					f(message, resp)
+				}
 			}
 		}
 	}
@@ -493,6 +510,8 @@ func (m *Messenger) classify(info MessageInfo, e Entry) Action {
 		return ReferralAction
 	} else if info.AccountLinking != nil {
 		return AccountLinkingAction
+	} else if info.PassThreadControl != nil {
+		return PassThreadControlAction
 	}
 	return UnknownAction
 }

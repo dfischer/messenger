@@ -45,6 +45,9 @@ type MessageInfo struct {
 	ReferralMessage *ReferralMessage `json:"referral"`
 
 	AccountLinking *AccountLinking `json:"account_linking"`
+
+	// Handover protocol: https://developers.facebook.com/docs/messenger-platform/handover-protocol/
+	PassThreadControl *ThreadControlMessage `json:"pass_thread_control"`
 }
 
 type OptIn struct {
@@ -61,6 +64,18 @@ type OptIn struct {
 // ReferralMessage represents referral endpoint
 type ReferralMessage struct {
 	*Referral
+
+	// Sender is the sender of the message
+	Sender Sender `json:"-"`
+	// Recipient is who the message was sent to.
+	Recipient Recipient `json:"-"`
+	// Time is when the message was sent.
+	Time time.Time `json:"-"`
+}
+
+// ThreadControlMessage represents passThreadControl endpoint
+type ThreadControlMessage struct {
+	*PassThreadControl
 
 	// Sender is the sender of the message
 	Sender Sender `json:"-"`
@@ -111,7 +126,7 @@ type QuickReply struct {
 // Payload is the information on where an attachment is.
 type Payload struct {
 	// URL is where the attachment resides on the internet.
-	URL         string       `json:"url,omitempty"`
+	URL string `json:"url,omitempty"`
 	// Coordinates is Lat/Long pair of location pin
 	Coordinates *Coordinates `json:"coordinates,omitempty"`
 }
@@ -119,7 +134,7 @@ type Payload struct {
 // Coordinates is a pair of latitude and longitude
 type Coordinates struct {
 	// Lat is latitude
-	Lat  float64 `json:"lat"`
+	Lat float64 `json:"lat"`
 	// Long is longitude
 	Long float64 `json:"long"`
 }

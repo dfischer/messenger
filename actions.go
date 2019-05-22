@@ -23,4 +23,6 @@ const (
 	// AccountLinkingAction means that the event concerns changes in account linking
 	// status.
 	AccountLinkingAction
+	// PassThreadControlAction triggers when the handover protocol pings to an app
+	PassThreadControlAction
 )
