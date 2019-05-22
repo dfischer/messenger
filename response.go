@@ -327,7 +327,7 @@ func (r *Response) DispatchMessage(m interface{}) error {
 // PassThreadToInbox Uses Messenger Handover Protocol for live inbox
 // https://developers.facebook.com/docs/messenger-platform/handover-protocol/#inbox
 func (r *Response) PassThreadToInbox() error {
-	p := passThreadControl{
+	p := PassThreadControl{
 		Recipient:   r.to,
 		TargetAppID: InboxPageID,
 		Metadata:    "Passing to inbox secondary app",
